@@ -1,3 +1,10 @@
+''' Implementation of DeepWaterMapV2.
+
+The model architecture is explained in:
+L.F. Isikdogan, A.C. Bovik, and P. Passalacqua,
+"Seeing Through the Clouds with DeepWaterMap," IEEE GRSL, 2019.
+'''
+
 import tensorflow as tf
 
 def model(min_width=4):

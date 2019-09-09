@@ -1,3 +1,8 @@
+''' Creates tfrecords given GeoTIFF files.
+We provide a copy of the dataset in tfrecords format.
+You should not need this script unless you modify the dataset.
+'''
+
 import os, glob
 import argparse
 import random
@@ -42,7 +47,6 @@ def preprocess_and_encode_sample(data_tensor):
     return [B2, B3, B4, B5, B6, B7, L]
 
 def create_tfrecords(save_dir, dataset_name, filenames, images_per_shard):
-
     data_placeholder = tf.placeholder(tf.uint16)
     processed_bands = preprocess_and_encode_sample(data_placeholder)
 

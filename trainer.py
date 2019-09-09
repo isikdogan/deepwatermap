@@ -1,21 +1,25 @@
-import os
+''' Trains a DeepWaterMap model. We provide a copy of the trained checkpoints.
+You should not need this script unless you want to re-train the model.
+'''
+
+import os, glob
+import argparse
 import tensorflow as tf
 import deepwatermap
-import glob
-from custom_metrics import running_precision, running_recall, running_f1, focal_loss, keras_lovasz_hinge
+from metrics import running_precision, running_recall, running_f1
+from metrics import adaptive_maxpool_loss
 
 class TFModelTrainer:
-    def __init__(self, checkpoint_dir='./checkpoints_scratch2/'):
+    def __init__(self, checkpoint_dir, data_path):
         self.checkpoint_dir = checkpoint_dir
 
         # set training parameters
         self.image_size = (512, 512)
-        self.learning_rate = 0.001 #0.0001 #0.001 #0.01 #0.1
-        self.num_epoch = 200
-        self.batch_size = 24 #48
+        self.learning_rate = 0.1
+        self.num_epoch = 150
+        self.batch_size = 24
 
         # create the data generators
-        data_path = "E:/tfrecords"
         train_filenames = glob.glob(os.path.join(data_path, 'train_*.tfrecord'))
         val_filenames = glob.glob(os.path.join(data_path, 'test_*.tfrecord'))
 
@@ -93,13 +97,12 @@ class TFModelTrainer:
     def train(self):
         # Callbacks
         cp_callback = tf.keras.callbacks.ModelCheckpoint(os.path.join(self.checkpoint_dir, 'cp.{epoch:03d}.ckpt'),
-                                                                            save_weights_only=True)
+                                                         save_weights_only=True)
         tb_callback = tf.keras.callbacks.TensorBoard(log_dir=self.checkpoint_dir)
         lr_callback = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1)
 
         # Model
         model = deepwatermap.model()
-        #model = tf.keras.utils.multi_gpu_model(model, gpus=2, cpu_merge=False)
 
         initial_epoch = 0
         ckpt = tf.train.get_checkpoint_state(self.checkpoint_dir)
@@ -109,7 +112,7 @@ class TFModelTrainer:
             initial_epoch = int(ckpt.model_checkpoint_path.split('.')[-2])
 
         model.compile(optimizer=self._optimizer(),
-                      loss=keras_lovasz_hinge,
+                      loss=adaptive_maxpool_loss,
                       metrics=[tf.keras.metrics.binary_accuracy,
                                running_precision, running_recall, running_f1])
         model.fit(self.dataset_train,
@@ -121,7 +124,13 @@ class TFModelTrainer:
                   callbacks=[cp_callback, tb_callback, lr_callback])
 
 def main():
-    trainer = TFModelTrainer()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--checkpoint_path', type=str, default='./checkpoints/',
+                        help="Path to the dir where the checkpoints are saved")
+    parser.add_argument('--data_path', type=str,
+                        help="Path to the tfrecord files")
+    args = parser.parse_args()
+    trainer = TFModelTrainer(args.checkpoint_path, args.data_path)
     trainer.train()
 
 if __name__ == '__main__':
