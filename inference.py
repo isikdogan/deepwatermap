@@ -1,4 +1,8 @@
 ''' Runs inference on a given GeoTIFF image.
+
+example:
+$ python inference.py --checkpoint_path checkpoints/cp.135.ckpt \
+    --image_path sample_data/sentinel2_example.tif --save_path water_map.png
 '''
 
 # Uncomment this to run inference on CPU if your GPU runs out of memory
@@ -37,14 +41,17 @@ def main(checkpoint_path, image_path, save_path):
     dwm = model.predict(image)
     dwm = np.squeeze(dwm)
     dwm = dwm[pad_r[0]:-pad_r[1], pad_c[0]:-pad_c[1]]
-    dwm[dwm < 0.5] = 0
+
+    # soft threshold
+    dwm = 1./(1+np.exp(-(16*(dwm-0.5))))
+    dwm = np.clip(dwm, 0, 1)
 
     # save the output water map
     cv2.imwrite(save_path, dwm * 255)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--checkpoint_path', type=str, default='./checkpoints/cp.150.ckpt',
+    parser.add_argument('--checkpoint_path', type=str,
                         help="Path to the dir where the checkpoints are stored")
     parser.add_argument('--image_path', type=str, help="Path to the input GeoTIFF image")
     parser.add_argument('--save_path', type=str, help="Path where the output map will be saved")
