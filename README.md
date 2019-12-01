@@ -1,5 +1,5 @@
 # DeepWaterMap
-DeepWaterMap is a deep convolutional neural network trained to segment surface water on multispectral imagery.
+DeepWaterMap is a deep convolutional neural network trained to segment surface water on multispectral imagery. This repository contains the resources for the most recent version of DeepWaterMap (v2.0).
 
 ![Sample input and output](sample_data/sample_input_output.png)
 
