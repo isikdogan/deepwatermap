@@ -1,4 +1,5 @@
 ''' Runs inference on a given GeoTIFF image.
+
 example:
 $ python inference.py --checkpoint_path checkpoints/cp.135.ckpt \
     --image_path sample_data/sentinel2_example.tif --save_path water_map.png
@@ -21,13 +22,13 @@ def find_padding(v, divisor=32):
     pad_2 = total_pad - pad_1
     return pad_1, pad_2
 
-def main(checkpoint_path, image_path, save_path):
+def main(checkpoint_path, image, save_path):
     # load the model
     model = deepwatermap.model()
     model.load_weights(checkpoint_path)
 
     # load and preprocess the input image
-    image = tiff.imread(image_path)
+    # image = tiff.imread(image_path)
     pad_r = find_padding(image.shape[0])
     pad_c = find_padding(image.shape[1])
     image = np.pad(image, ((pad_r[0], pad_r[1]), (pad_c[0], pad_c[1]), (0, 0)), 'reflect')
@@ -63,7 +64,33 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint_path', type=str,
                         help="Path to the dir where the checkpoints are stored")
-    parser.add_argument('--image_path', type=str, help="Path to the input GeoTIFF image")
+    #parser.add_argument('--image_path', type=str, help="Path to the input GeoTIFF image")
+    parser.add_argument('--B2', type=str, help="Path to the B2 GeoTIFF image")
+    parser.add_argument('--B3', type=str, help="Path to the B3 GeoTIFF image")
+    parser.add_argument('--B4', type=str, help="Path to the B4 GeoTIFF image")
+    parser.add_argument('--B5', type=str, help="Path to the B5 GeoTIFF image")
+    parser.add_argument('--B6', type=str, help="Path to the B6 GeoTIFF image")
+    parser.add_argument('--B7', type=str, help="Path to the B7 GeoTIFF image")
     parser.add_argument('--save_path', type=str, help="Path where the output map will be saved")
     args = parser.parse_args()
-    main(args.checkpoint_path, args.image_path, args.save_path)
+
+    dtype = np.dtype('>u2')
+    shape = (809,809,1)
+    B2 = np.fromfile(open(args.B2, 'rb'), dtype).reshape(shape)
+    B3 = np.fromfile(open(args.B3, 'rb'), dtype).reshape(shape)
+    B4 = np.fromfile(open(args.B4, 'rb'), dtype).reshape(shape)
+    B5 = np.fromfile(open(args.B5, 'rb'), dtype).reshape(shape)
+    B6 = np.fromfile(open(args.B6, 'rb'), dtype).reshape(shape)
+    B7 = np.fromfile(open(args.B7, 'rb'), dtype).reshape(shape)
+    # B3 = tiff.imread(args.B3)
+    # B4 = tiff.imread(args.B4) 
+    # B5 = tiff.imread(args.B5)
+    # B6 = tiff.imread(args.B6)
+    # B7 = tiff.imread(args.B7)
+    print(B2.shape)
+    inter_1 = np.concatenate((B2, B3), axis=2)
+    inter_2 = np.concatenate((inter_1, B4), axis=2)
+    inter_3 = np.concatenate((inter_2, B5), axis=2)
+    inter_4 = np.concatenate((inter_3, B6), axis=2)
+    inter_5 = np.concatenate((inter_4, B7), axis=2)
+    main(args.checkpoint_path, inter_5, args.save_path)
