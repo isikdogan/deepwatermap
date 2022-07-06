@@ -1,0 +1,8 @@
+name: deepwatermap
+channels:
+  - conda-forge
+dependencies:
+  - tensorflow==1.12.0
+  - tifffile
+  - opencv
+  - imagecodecs
