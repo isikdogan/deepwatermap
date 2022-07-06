@@ -2,3 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+build
+*.egg-info
+checkpoints
+
+sample_data/*.tif
