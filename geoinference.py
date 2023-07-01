@@ -2,12 +2,12 @@
 
 example:
 $ python geoinference.py --checkpoint_path checkpoints/cp.135.ckpt \
-    --image_path sample_data/sentinel2_example.tif --save_path water_map.png
+    --image_path sample_data/sentinel2_example.tif --save_path water_map.tif
 '''
 
 # Uncomment this to run inference on CPU if your GPU runs out of memory
-import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+#import os
+#os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 import argparse
 import deepwatermap
