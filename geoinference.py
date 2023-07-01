@@ -70,7 +70,7 @@ def main(checkpoint_path, image_path, save_path):
     'count': img.shape[0],
     'compress': 'lzw'})
 
-    # save the output water map
+    # save the output of dwm
     with rio.open(save_path, 'w', **metadata) as dst:
         dst.write(dwm)
 
