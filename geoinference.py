@@ -66,8 +66,8 @@ def main(checkpoint_path, image_path, save_path):
     # get image metadata
     metadata = src.meta().copy()
     metadata.update({
-    'dtype': img.dtype,
-    'count': img.shape[0],
+    'dtype': image.dtype,
+    'count': image.shape[0],
     'compress': 'lzw'})
 
     # save the output as GeoTIFF
