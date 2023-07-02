@@ -64,7 +64,7 @@ def main(checkpoint_path, image_path, save_path):
     dwm = np.expand_dims(dwm*255, axis=0)
     
     # get image metadata
-    metadata = src.meta().copy()
+    metadata = src.meta
     metadata.update({
     'dtype': image.dtype,
     'count': image.shape[0],
